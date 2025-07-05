@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,8 @@ import { PodcastPersonaCard } from "@/components/PodcastPersonaCard";
 import { GenerationControls } from "@/components/GenerationControls";
 import { EpisodeHistory } from "@/components/EpisodeHistory";
 import { NewsSourcesWidget } from "@/components/NewsSourcesWidget";
+import { ApiConfiguration, ApiConfig } from "@/components/ApiConfiguration";
+import { PodcastGenerator, GeneratedPodcast } from "@/services/PodcastGenerator";
 import heroImage from "@/assets/podcast-hero.jpg";
 import { 
   Play, 
@@ -17,46 +19,114 @@ import {
   TrendingUp,
   Users,
   Mic,
-  Radio
+  Radio,
+  Settings
 } from "lucide-react";
+import { toast } from "sonner";
 
 const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState(0);
+  const [generationProgress, setGenerationProgress] = useState("");
   const [nextEpisodeDate] = useState(new Date('2024-01-19'));
+  const [showApiConfig, setShowApiConfig] = useState(false);
+  const [apiConfig, setApiConfig] = useState<ApiConfig | null>(null);
+  const [podcastGenerator] = useState(new PodcastGenerator());
+  const [latestPodcast, setLatestPodcast] = useState<GeneratedPodcast | null>(null);
+
+  // Načíst uloženou konfiguraci při startu
+  useState(() => {
+    const savedConfig = localStorage.getItem('podcastApiConfig');
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        setApiConfig(config);
+        podcastGenerator.setConfig(config);
+      } catch (e) {
+        console.error('Chyba při načítání API konfigurace:', e);
+      }
+    }
+  });
+
+  const handleApiConfigSave = useCallback((config: ApiConfig) => {
+    setApiConfig(config);
+    podcastGenerator.setConfig(config);
+    localStorage.setItem('podcastApiConfig', JSON.stringify(config));
+    toast.success("API konfigurace uložena");
+  }, [podcastGenerator]);
+
+  const handleStartGeneration = useCallback(async () => {
+    if (!apiConfig) {
+      setShowApiConfig(true);
+      toast.error("Nejprve nastavte API klíče");
+      return;
+    }
+
+    setIsGenerating(true);
+    setGenerationStep(0);
+    
+    try {
+      const podcast = await podcastGenerator.generateWeeklyPodcast(
+        (step: string, progress: number) => {
+          setGenerationProgress(step);
+          setGenerationStep(Math.floor(progress / 16.67)); // 0-5 steps
+        }
+      );
+      
+      setLatestPodcast(podcast);
+      toast.success("Podcast úspěšně vygenerován!");
+    } catch (error) {
+      console.error('Chyba při generování:', error);
+      toast.error("Chyba při generování podcastu: " + (error as Error).message);
+    } finally {
+      setIsGenerating(false);
+      setGenerationStep(0);
+      setGenerationProgress("");
+    }
+  }, [apiConfig, podcastGenerator]);
+
+  const handleStopGeneration = useCallback(() => {
+    setIsGenerating(false);
+    setGenerationStep(0);
+    setGenerationProgress("");
+    toast.info("Generování zastaveno");
+  }, []);
+
+  // Kontrola jestli jsou API klíče nastavené
+  const hasApiKeys = apiConfig?.elevenLabs && apiConfig?.openai;
 
   const personas = [
     {
-      id: "anna",
-      name: "Anna Trendová",
+      id: "petr",
+      name: "Petr Mára",
       role: "Analytik trendů",
       description: "Zaměřuje se na makro trendy v AI, automatizaci, průmyslu 4.0, Web3, kvantových technologiích",
       avatar: "/api/placeholder/120/120",
-      voiceId: "anna_czech_voice",
+      voiceId: "petr_czech_voice",
       gradient: "from-blue-400 to-purple-600",
       sources: ["Gartner", "McKinsey", "CB Insights", "MIT Technology Review"],
       currentTopics: 3,
       status: "ready" as const
     },
     {
-      id: "tomas", 
-      name: "Tomáš Kódl",
+      id: "lubo", 
+      name: "Lubo Smid",
       role: "Technický expert",
       description: "Konkrétní nové nástroje, frameworky, API, knihovny, pokroky v modelování, hardware",
       avatar: "/api/placeholder/120/120",
-      voiceId: "tomas_czech_voice",
+      voiceId: "lubo_czech_voice",
       gradient: "from-green-400 to-blue-500",
       sources: ["Hacker News", "GitHub Trending", "Papers with Code", "arXiv"],
       currentTopics: 4,
       status: "collecting" as const
     },
     {
-      id: "eva",
-      name: "Eva Praktická", 
-      role: "UX/Produkt specialistka",
+      id: "jarda",
+      name: "Jarda Beck", 
+      role: "UX/Produkt specialista",
       description: "Praktické využití, uživatelské chování, reálné případovky, nové startupy",
       avatar: "/api/placeholder/120/120",
-      voiceId: "eva_czech_voice",
+      voiceId: "jarda_czech_voice",
       gradient: "from-pink-400 to-orange-500",
       sources: ["Product Hunt", "IndieHackers", "TechCrunch Startups"],
       currentTopics: 2,
@@ -102,6 +172,22 @@ const Index = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* API Configuration Button */}
+      <div className="flex justify-center mb-6">
+        <Button
+          onClick={() => setShowApiConfig(true)}
+          variant={hasApiKeys ? "outline" : "default"}
+          size="lg"
+          className={hasApiKeys ? 
+            "bg-green-500/10 text-green-400 border-green-500/30 hover:bg-green-500/20" : 
+            "bg-gradient-primary hover:shadow-glow-primary"
+          }
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          {hasApiKeys ? "Upravit API klíče" : "Nastavit API klíče"}
+        </Button>
       </div>
 
       {/* Status Overview */}
@@ -192,9 +278,11 @@ const Index = () => {
       {/* Generation Controls */}
       <GenerationControls 
         isGenerating={isGenerating}
-        onStartGeneration={() => setIsGenerating(true)}
-        onStopGeneration={() => setIsGenerating(false)}
+        onStartGeneration={handleStartGeneration}
+        onStopGeneration={handleStopGeneration}
         nextEpisodeDate={nextEpisodeDate}
+        hasApiKeys={!!hasApiKeys}
+        currentStep={generationProgress}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
@@ -204,6 +292,13 @@ const Index = () => {
         {/* Episode History */}
         <EpisodeHistory />
       </div>
+
+      {/* API Configuration Modal */}
+      <ApiConfiguration
+        isOpen={showApiConfig}
+        onClose={() => setShowApiConfig(false)}
+        onSave={handleApiConfigSave}
+      />
     </div>
   );
 };

@@ -20,6 +20,8 @@ interface GenerationControlsProps {
   onStartGeneration: () => void;
   onStopGeneration: () => void;
   nextEpisodeDate: Date;
+  hasApiKeys?: boolean;
+  currentStep?: string;
 }
 
 export const GenerationControls = ({ 
