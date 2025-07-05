@@ -1,73 +1,103 @@
-# Welcome to your Lovable project
+# FUNtastic-AI-Future : PodcastWeb
 
-## Project info
+Automatizovaný generátor týdenního tech podcastu s AI specialisty (Petr Mára, Lubo Smid, Jarda Beck).
 
-**URL**: https://lovable.dev/projects/6e758a04-aa06-48ee-beb3-39a74fe2b2c3
+## 🚀 GitHub Pages Deployment
 
-## How can I edit this code?
+Tento projekt je automaticky nasazován na GitHub Pages při každém commitu do main/master větve.
 
-There are several ways of editing your application.
+### Nastavení GitHub Pages
 
-**Use Lovable**
+1. **Připojte projekt k GitHubu v Lovable:**
+   - Klikněte na tlačítko GitHub v pravém horním rohu
+   - Vyberte "Connect to GitHub"  
+   - Autorizujte Lovable GitHub App
+   - Vyberte účet/organizaci pro repository
+   - Klikněte "Create Repository"
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6e758a04-aa06-48ee-beb3-39a74fe2b2c3) and start prompting.
+2. **Aktivujte GitHub Pages:**
+   - Jděte do nastavení repository na GitHubu
+   - Sekce "Pages" v levém menu
+   - Source: "GitHub Actions"
+   - Uložte nastavení
 
-Changes made via Lovable will be committed automatically to this repo.
+3. **Automatický deployment:**
+   - Při každém push do main/master větve se spustí GitHub Action
+   - Build proběhne automaticky
+   - Aplikace se nasadí na `https://[username].github.io/FUNtastic-AI-Future-PodcastWeb/`
 
-**Use your preferred IDE**
+### Lokální development
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Instalace závislostí
+npm install
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Development server
 npm run dev
+
+# Build pro produkci
+npm run build
+
+# Preview produkčního buildu
+npm run preview
 ```
 
-**Edit a file directly in GitHub**
+## 🔧 API Konfigurace
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Pro plnou funkčnost potřebujete nastavit API klíče:
 
-**Use GitHub Codespaces**
+### Povinné API klíče:
+- **ElevenLabs API** - pro generování hlasů
+  - Získat na: https://elevenlabs.io/app/speech-synthesis
+  - Formát: `sk_...`
+  
+- **OpenAI API** - pro generování scénářů  
+  - Získать na: https://platform.openai.com/api-keys
+  - Formát: `sk-...`
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Volitelné API klíče:
+- **NewsAPI** - pro sběr tech novinek
+  - Získat na: https://newsapi.org/account
+  
+- **Reddit API** - pro sběr z r/technology
+  - Nastavit na: https://www.reddit.com/prefs/apps
 
-## What technologies are used for this project?
+## 🎙️ Funkce
 
-This project is built with:
+- ✅ Automatický sběr tech novinek z více zdrojů
+- ✅ AI analýza a výběr top témat týdne  
+- ✅ Generování přirozeného dialogu mezi specialisty
+- ✅ Syntéza českých hlasů pomocí ElevenLabs
+- ✅ Kompletní správa epizod a historie
+- ✅ Responsivní design s tmavým tech vzhledem
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🤖 AI Specialisté
 
-## How can I deploy this project?
+- **Petr Mára** - Analytik trendů (makro pohled, budoucnost)
+- **Lubo Smid** - Technický expert (frameworky, implementace)  
+- **Jarda Beck** - UX/Produkt specialista (praktické využití)
 
-Simply open [Lovable](https://lovable.dev/projects/6e758a04-aa06-48ee-beb3-39a74fe2b2c3) and click on Share -> Publish.
+## 📊 Zdroje dat
 
-## Can I connect a custom domain to my Lovable project?
+- Hacker News API
+- Reddit r/technology, r/MachineLearning
+- ArXiv AI Papers
+- TechCrunch RSS
+- Product Hunt
+- MIT Technology Review
 
-Yes, you can!
+## 🛠️ Tech Stack
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- **Frontend:** React 18 + TypeScript
+- **Styling:** Tailwind CSS + shadcn/ui  
+- **Build:** Vite
+- **Deployment:** GitHub Pages
+- **AI Services:** OpenAI GPT-4 + ElevenLabs TTS
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 📝 License
+
+MIT License - volně použitelné pro komerční i nekomerční účely.
+
+---
+
+**Vytvořeno s ❤️ pomocí Lovable.dev**
