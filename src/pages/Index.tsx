@@ -150,7 +150,7 @@ const Index = () => {
       <div className="relative mb-12 rounded-2xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent z-10"></div>
         <img 
-          src="/lovable-uploads/92dc2df1-fa3c-4ce9-8de0-190f9b1db5b0.png" 
+          src="/lovable-uploads/cb0a13fa-8537-449a-be26-d26d19414fcf.png" 
           alt="FUNtastic-AI-Future Team"
           className="w-full h-[400px] object-cover"
         />
