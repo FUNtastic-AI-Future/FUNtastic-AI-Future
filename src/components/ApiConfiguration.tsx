@@ -119,15 +119,32 @@ export const ApiConfiguration = ({ isOpen, onClose, onSave }: ApiConfigurationPr
   const validateApiKey = async (service: string, key: string) => {
     setIsValidating(true);
     try {
-      // Mock validation - replace with real API calls
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let isValid = false;
       
-      // Simulate validation logic
-      const isValid = key.length > 10 && (
-        (service === "elevenLabs" && key.startsWith("sk_")) ||
-        (service === "openai" && key.startsWith("sk-")) ||
-        (service === "newsApi" && key.length > 5)
-      );
+      if (service === "elevenLabs") {
+        // Skutečné volání ElevenLabs API
+        const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+          headers: {
+            'xi-api-key': key,
+          }
+        });
+        isValid = response.ok;
+      } else if (service === "openai") {
+        // Skutečné volání OpenAI API
+        const response = await fetch('https://api.openai.com/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${key}`,
+          }
+        });
+        isValid = response.ok;
+      } else if (service === "newsApi") {
+        // Skutečné volání NewsAPI
+        const response = await fetch(`https://newsapi.org/v2/everything?q=technology&apiKey=${key}&pageSize=1`);
+        isValid = response.ok;
+      } else {
+        // Fallback mock validation
+        isValid = key.length > 10;
+      }
 
       setKeyStatus(prev => ({
         ...prev,
@@ -138,13 +155,14 @@ export const ApiConfiguration = ({ isOpen, onClose, onSave }: ApiConfigurationPr
         }
       }));
 
-      toast.success(isValid ? `${service} klíč je platný` : `${service} klíč je neplatný`);
+      toast.success(isValid ? `${service} klíč je platný ✅` : `${service} klíč je neplatný ❌`);
     } catch (error) {
+      console.error(`Chyba při validaci ${service}:`, error);
       setKeyStatus(prev => ({
         ...prev,
         [service]: { key, status: "invalid", lastTested: new Date() }
       }));
-      toast.error("Chyba při validaci klíče");
+      toast.error(`Chyba při validaci ${service} klíče`);
     }
     setIsValidating(false);
   };

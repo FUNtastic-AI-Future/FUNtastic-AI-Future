@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import { 
   Play,
   Square,
@@ -12,7 +13,8 @@ import {
   Settings,
   Zap,
   Download,
-  Upload
+  Upload,
+  Loader2
 } from "lucide-react";
 
 interface GenerationControlsProps {
@@ -28,7 +30,9 @@ export const GenerationControls = ({
   isGenerating, 
   onStartGeneration, 
   onStopGeneration,
-  nextEpisodeDate 
+  nextEpisodeDate,
+  hasApiKeys,
+  currentStep
 }: GenerationControlsProps) => {
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('cs-CZ', { 
@@ -37,6 +41,21 @@ export const GenerationControls = ({
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  const getGenerationProgress = () => {
+    if (!currentStep) return 0;
+    
+    const stepMap: Record<string, number> = {
+      "Sbírám novinky z online zdrojů": 15,
+      "Analyzuji a vybírám top témata": 35,
+      "Generuji scénář podcastu": 55,
+      "Vytvářím AI hlasy": 75,
+      "Finalizuji podcast": 90,
+      "Hotovo!": 100
+    };
+    
+    return stepMap[currentStep] || 0;
   };
 
   return (
@@ -90,6 +109,28 @@ export const GenerationControls = ({
             )}
           </div>
         </div>
+
+        {/* Generation Progress */}
+        {isGenerating && (
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <h3 className="font-medium">Generování probíhá...</h3>
+              </div>
+              
+              {currentStep && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{currentStep}</span>
+                    <span className="text-primary font-medium">{getGenerationProgress()}%</span>
+                  </div>
+                  <Progress value={getGenerationProgress()} className="h-2" />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <Separator />
 
