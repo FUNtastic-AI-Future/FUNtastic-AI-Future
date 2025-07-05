@@ -10,7 +10,6 @@ import { EpisodeHistory } from "@/components/EpisodeHistory";
 import { NewsSourcesWidget } from "@/components/NewsSourcesWidget";
 import { ApiConfiguration, ApiConfig } from "@/components/ApiConfiguration";
 import { PodcastGenerator, GeneratedPodcast } from "@/services/PodcastGenerator";
-import heroImage from "@/assets/podcast-hero.jpg";
 import { 
   Play, 
   Pause, 
@@ -151,8 +150,8 @@ const Index = () => {
       <div className="relative mb-12 rounded-2xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent z-10"></div>
         <img 
-          src={heroImage} 
-          alt="AI Podcast Studio"
+          src="/lovable-uploads/cb0a13fa-8537-449a-be26-d26d19414fcf.png" 
+          alt="FUNtastic-AI-Future Team"
           className="w-full h-[400px] object-cover"
         />
         <div className="absolute inset-0 z-20 flex items-center justify-center">
