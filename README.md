@@ -8,10 +8,10 @@ Tento projekt je automaticky nasazován na GitHub Pages při každém commitu do
 
 ### Nastavení GitHub Pages
 
-1. **Připojte projekt k GitHubu v Lovable:**
+1. **Připojte projekt k GitHubu v Praut s.r.o.:**
    - Klikněte na tlačítko GitHub v pravém horním rohu
    - Vyberte "Connect to GitHub"  
-   - Autorizujte Lovable GitHub App
+   - Autorizujte Praut s.r.o. GitHub App
    - Vyberte účet/organizaci pro repository
    - Klikněte "Create Repository"
 
@@ -100,4 +100,4 @@ MIT License - volně použitelné pro komerční i nekomerční účely.
 
 ---
 
-**Vytvořeno s ❤️ pomocí Lovable.dev**
+**Vytvořeno s ❤️ Martinem Švandou z Praut s.r.o.**
