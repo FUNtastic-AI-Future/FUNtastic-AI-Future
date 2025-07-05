@@ -163,7 +163,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Tech Podcast AI Generator
+                  FUNtastic-AI-Future : PodcastWeb
                 </h1>
                 <p className="text-primary-foreground/90 text-lg mt-2">
                   Automatizovaný generátor týdenního tech podcastu s AI specialisty
