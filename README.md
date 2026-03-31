@@ -1,6 +1,6 @@
-# FUNtastic-AI-Future : PodcastWeb
+# FUNtastic AI Future: Podcast Generator Web
 
-Automatizovaný generátor týdenního tech podcastu s AI specialisty (Petr Mára, Lubo Smid, Jarda Beck).
+Ultimate Local-First Podcast Generator with AI - Generate engaging podcasts using local AI models with Clean Architecture and offline-first design.
 
 ## 🚀 GitHub Pages Deployment
 

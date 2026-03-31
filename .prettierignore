@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.git/
+*.log
+*.lock
+package-lock.json
+yarn.lock
+.env
+.env.local
+.env.production
+.env.test
