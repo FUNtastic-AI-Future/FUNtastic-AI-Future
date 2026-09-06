@@ -92,9 +92,21 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
                     raise ValueError(f'Chybí právě jedna WAV ukázka pro {speaker}. Nahraj soubor s názvem obsahujícím {aliases[speaker][0]}.')
                 reference.write_bytes(matches[0][1])
                 info = sf.info(str(reference))
-                if not 3 <= info.duration <= 10:
+                if info.duration < 3:
                     reference.unlink()
-                    raise ValueError('Ukázka musí mít 3–10 sekund, bez automatického ořezávání.')
+                    raise ValueError('Ukázka musí mít alespoň 3 sekundy.')
+                if info.duration > 10:
+                    # The supplied files are often full clean recordings. Pick the
+                    # loudest 8-second window so the clone gets speech, not silence.
+                    audio, rate = sf.read(str(reference), dtype='float32')
+                    mono = audio.mean(axis=1) if getattr(audio, 'ndim', 1) == 2 else audio
+                    window = min(int(rate * 8), len(mono))
+                    hop = max(1, int(rate * 0.5))
+                    starts = range(0, max(1, len(mono) - window + 1), hop)
+                    start = max(starts, key=lambda pos: float(np.sqrt(np.mean(mono[pos:pos + window] ** 2))))
+                    trimmed = audio[start:start + window]
+                    sf.write(str(reference), trimmed, rate)
+                    print(f'{speaker}: dlouhá ukázka zkrácena na {len(trimmed) / rate:.1f} s.', flush=True)
                 transcript_matches = [(name, value) for name, value in uploaded_voice_files.items()
                                       if name.lower().endswith('.txt') and any(alias in name.lower() for alias in aliases[speaker])]
                 spoken = transcript_matches[0][1].decode('utf-8') if len(transcript_matches) == 1 else input(f'{speaker}: přesný přepis celé ukázky: ').strip()
