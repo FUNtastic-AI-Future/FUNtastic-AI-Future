@@ -67,7 +67,9 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
         import re
         if not re.fullmatch(r'[a-f0-9]{64}', session_id):
             raise ValueError('Neplatné ID relace.')
-    work = root / (session_id or digest) / ('custom' if custom_voices else 'synthetic')
+    # Versioned audio cache: old short renders must never be reused after a
+    # renderer change. The script itself remains the same EPISODE.
+    work = root / (session_id or digest) / ('custom-v2' if custom_voices else 'synthetic-v2')
     work.mkdir(parents=True, exist_ok=True)
     (work / 'episode.json').write_text(json.dumps(episode, ensure_ascii=False, indent=2), encoding='utf-8')
     (work / 'transcript.txt').write_text('\n\n'.join(s['speaker'].upper() + ': ' + s['text'] for s in segments), encoding='utf-8')

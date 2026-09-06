@@ -15,7 +15,7 @@ export function createLaunchNotebook(bundle, generator, renderer) {
     let source = item.source.join('').replace('SAVE_TO_DRIVE, False, session_id', 'SAVE_TO_DRIVE, True, session_id');
     source = source.replace(
       '    EPISODE = generate_episode(BUNDLE, SESSION, additional_words=max(500, int((3600-report["seconds"]) / 60 * 170)))',
-      '    for _resume in range(20):\n        try:\n            EPISODE = generate_episode(BUNDLE, SESSION, additional_words=max(500, int((3600-report["seconds"]) / 60 * 170)))\n            break\n        except RuntimeError as exc:\n            print(f"Pokračování scénáře čeká ({_resume + 1}/20): {exc}", flush=True)\n            if _resume == 19: raise\n            time.sleep(min(60, 10 * (_resume + 1)))'
+      '    raise RuntimeError("Audio je kratší než hodina; scénář zůstává beze změny. Spusť pouze tento renderer znovu.")'
     );
     item.source = source.split(/(?<=\n)/);
   }
