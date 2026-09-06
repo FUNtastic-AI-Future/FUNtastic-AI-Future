@@ -1,6 +1,7 @@
 """Self-contained Colab renderer, embedded verbatim in exported notebooks."""
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -44,6 +45,23 @@ def split_text(text, limit=600):
     return chunks
 
 
+def audio_quality(path, sf, np, expected_seconds):
+    samples, rate = sf.read(str(path), dtype='float32')
+    if samples.size == 0 or not np.isfinite(samples).all():
+        return False, 'prázdné nebo nečíselné audio'
+    mono = samples.mean(axis=1) if getattr(samples, 'ndim', 1) == 2 else samples
+    duration = len(mono) / rate
+    rms = float(np.sqrt(np.mean(mono ** 2)))
+    peak = float(np.max(np.abs(mono)))
+    if duration < max(1.5, expected_seconds * 0.35):
+        return False, f'příliš krátké ({duration:.1f}s místo očekávaných {expected_seconds:.1f}s)'
+    if rms < 1e-4:
+        return False, 'téměř tiché'
+    if peak > 1.01:
+        return False, f'přebuzené (peak {peak:.2f})'
+    return True, f'{duration:.1f}s RMS {rms:.3f} peak {peak:.3f}'
+
+
 def main(episode, persist=False, custom_voices=False, session_id=None, download=True):
     segments = validate_episode(episode)
     from google.colab import files
@@ -51,13 +69,19 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
         subprocess.run(['apt-get', 'update', '-qq'], check=True)
         subprocess.run(['apt-get', 'install', '-y', '-qq', 'ffmpeg'], check=True)
     import torch
-    if not torch.cuda.is_available():
-        raise RuntimeError('Zapni Runtime → Change runtime type → T4 GPU.')
+    if torch.cuda.is_available():
+        device = 'cuda:0'
+        dtype = torch.float16
+    elif getattr(torch.backends, 'mps', None) is not None and torch.backends.mps.is_available():
+        device = 'mps'
+        dtype = torch.float32
+    else:
+        raise RuntimeError('Není dostupné CUDA ani Apple MPS GPU.')
     import numpy as np
     import soundfile as sf
     from omnivoice import OmniVoice
 
-    root = Path('/content/podcastweb')
+    root = Path(os.environ.get('PODCASTWEB_ROOT', '/content/podcastweb'))
     if persist:
         from google.colab import drive
         drive.mount('/content/drive')
@@ -82,12 +106,12 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
     (work / 'episode.json').write_text(json.dumps(episode, ensure_ascii=False, indent=2), encoding='utf-8')
     (work / 'transcript.txt').write_text('\n\n'.join(s['speaker'].upper() + ': ' + s['text'] for s in segments), encoding='utf-8')
     (work / 'sources.json').write_text(json.dumps(episode.get('sources', []), ensure_ascii=False, indent=2), encoding='utf-8')
-    model = OmniVoice.from_pretrained('k2-fsa/OmniVoice', device_map='cuda:0', dtype=torch.float16)
+    model = OmniVoice.from_pretrained('k2-fsa/OmniVoice', device_map=device, dtype=dtype)
     designs = {'petr': 'male, middle-aged, moderate pitch', 'jarda': 'male, middle-aged, low pitch', 'lubo': 'male, young adult, high pitch'}
     reference_text = 'Dobrý den. Dnes společně probereme nové technologie a jejich dopad na každodenní život.'
     prompts = {}
     uploaded_voice_files = {}
-    if custom_voices:
+    if custom_voices and any(not (work / f'{speaker}-reference.wav').exists() or not (work / f'{speaker}-reference.txt').exists() for speaker in ('petr', 'jarda', 'lubo')):
         print('Nahraj jedním výběrem tři WAV ukázky (petr/jaroslav nebo jarda/lubo) a pokud máš, jejich TXT přepisy. Uloží se do Drive a příště se znovu neptají.', flush=True)
         uploaded_voice_files = files.upload()
     for speaker, design in designs.items():
@@ -127,6 +151,17 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
                 samples = model.generate(text=spoken, instruct=design)[0]
                 sf.write(str(reference), samples, 24000)
             transcript.write_text(spoken, encoding='utf-8')
+        # Also normalize references restored from an earlier cache.
+        info = sf.info(str(reference))
+        if info.duration > 10:
+            audio, rate = sf.read(str(reference), dtype='float32')
+            mono = audio.mean(axis=1) if getattr(audio, 'ndim', 1) == 2 else audio
+            window = min(int(rate * 8), len(mono))
+            hop = max(1, int(rate * 0.5))
+            start = max(range(0, max(1, len(mono) - window + 1), hop),
+                        key=lambda pos: float(np.sqrt(np.mean(mono[pos:pos + window] ** 2))))
+            sf.write(str(reference), audio[start:start + window], rate)
+            print(f'{speaker}: cache reference zkrácena na 8 s.', flush=True)
         prompts[speaker] = model.create_voice_clone_prompt(ref_audio=str(reference), ref_text=transcript.read_text(encoding='utf-8'))
 
     chunks = [(s['speaker'], part) for s in segments for part in split_text(s['text'])]
@@ -134,25 +169,31 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
     for index, (speaker, text) in enumerate(chunks):
         key = hashlib.sha256((speaker + text).encode()).hexdigest()[:12]
         path = work / f'{index:05d}-{key}.wav'
+        target_seconds = max(3.0, min(55.0, len(text.split()) / 2.33))
         valid = False
         if path.exists():
             try:
-                valid = sf.info(str(path)).frames > 0
+                valid, quality = audio_quality(path, sf, np, target_seconds)
+                if not valid:
+                    print(f'{index + 1}/{len(chunks)} — vadná cache: {quality}', flush=True)
             except (RuntimeError, ValueError):
                 pass
         if not valid:
             # OmniVoice otherwise uses a very short default and silently
             # truncates long Czech replies. Request a duration based on
             # natural podcast speech (~140 words/minute).
-            target_seconds = max(3.0, min(55.0, len(text.split()) / 2.33))
             samples = np.asarray(model.generate(text=text, voice_clone_prompt=prompts[speaker], duration=target_seconds)[0])
             if samples.size == 0 or not np.isfinite(samples).all():
                 raise ValueError(f'Vadné audio v úseku {index + 1}. Opakuj render.')
             temporary = path.with_suffix('.tmp.wav')
             sf.write(str(temporary), samples, 24000)
             temporary.replace(path)
+            valid, quality = audio_quality(path, sf, np, target_seconds)
+            if not valid:
+                path.unlink(missing_ok=True)
+                raise ValueError(f'Vadný úsek {index + 1}: {quality}')
         paths.append(path)
-        print(f'{index + 1}/{len(chunks)} — {speaker}', flush=True)
+        print(f'{index + 1}/{len(chunks)} — {speaker} — {quality}', flush=True)
 
     # Stream PCM to disk instead of repeatedly copying an hour-long in-memory mix.
     master = work / 'episode.wav'
