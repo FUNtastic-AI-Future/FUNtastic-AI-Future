@@ -71,6 +71,14 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
     # renderer change. The script itself remains the same EPISODE.
     work = root / (session_id or digest) / ('custom-v2' if custom_voices else 'synthetic-v2')
     work.mkdir(parents=True, exist_ok=True)
+    if custom_voices:
+        legacy = root / (session_id or digest) / 'custom'
+        for speaker in ('petr', 'jarda', 'lubo'):
+            for suffix in ('reference.wav', 'reference.txt'):
+                target = work / f'{speaker}-{suffix}'
+                old = legacy / f'{speaker}-{suffix}'
+                if not target.exists() and old.exists():
+                    shutil.copy2(old, target)
     (work / 'episode.json').write_text(json.dumps(episode, ensure_ascii=False, indent=2), encoding='utf-8')
     (work / 'transcript.txt').write_text('\n\n'.join(s['speaker'].upper() + ': ' + s['text'] for s in segments), encoding='utf-8')
     (work / 'sources.json').write_text(json.dumps(episode.get('sources', []), ensure_ascii=False, indent=2), encoding='utf-8')
