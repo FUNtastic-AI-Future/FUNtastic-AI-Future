@@ -11,6 +11,7 @@ from pathlib import Path
 
 SPEAKERS = {'petr', 'jarda', 'lubo'}
 FREE_MODELS = []
+_CACHED_KEY = None
 ROLES = 'Petr moderuje a ptá se na lidský dopad. Jarda zkoumá mechanismy a experimenty. Lubo zvažuje ekonomiku a rizika. Jde o fiktivní dramaturgické role; osobní fakta a styl čerpej pouze z přiložených datovaných podkladů.'
 GENERATOR_VERSION = '2026-09-06-grounding-3'
 DISCLOSURE = 'Posloucháte synteticky vytvořený podcast se třemi umělými hlasy. Dialog není autentickým vyjádřením skutečných osob.'
@@ -99,6 +100,9 @@ def prepare_session(bundle, persist=True):
 
 
 def read_key():
+    global _CACHED_KEY
+    if _CACHED_KEY:
+        return _CACHED_KEY
     key = ''
     try:
         from google.colab import userdata
@@ -109,7 +113,8 @@ def read_key():
         key = getpass.getpass('Vlastní OpenRouter API klíč (skrytý vstup): ')
     if not key or not key.strip():
         raise ValueError('Chybí OpenRouter klíč.')
-    return key.strip()
+    _CACHED_KEY = key.strip()
+    return _CACHED_KEY
 
 
 def api_error(error, key, status=None):
