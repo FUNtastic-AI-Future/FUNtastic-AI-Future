@@ -356,7 +356,13 @@ def generate_episode(bundle, session, additional_words=0):
     state = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'segments': [], 'chapters': [], 'target': 8100}
     count = lambda: sum(len(s['text'].split()) for s in state['segments'])
     # Persist an extension target before calling the API; resumes do not lose it.
-    state['target'] = max(state['target'], count() + additional_words)
+    # Older runs incorrectly raised the target while extending short audio.
+    # A normal resume must never inherit that inflated target; the script
+    # contract is one 8,100-word episode. Explicit extensions remain opt-in.
+    if additional_words:
+        state['target'] = max(8100, count() + additional_words)
+    else:
+        state['target'] = min(max(8100, state.get('target', 8100)), max(8100, count()))
     atomic_json(path, state)
     if count() < state['target']:
         key = read_key()
