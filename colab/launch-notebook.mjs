@@ -14,6 +14,10 @@ export function createLaunchNotebook(bundle, generator, renderer) {
   for (const item of cells) if (item.cell_type === 'code') {
     let source = item.source.join('').replace('SAVE_TO_DRIVE, False, session_id', 'SAVE_TO_DRIVE, True, session_id');
     source = source.replace(
+      'import subprocess, sys\nsubprocess.run(["nvidia-smi"], check=True)',
+      'import shutil, subprocess, sys\nif shutil.which("nvidia-smi") is None:\n    raise RuntimeError("GPU není připojené. V Colabu zvol Runtime → Change runtime type → T4 GPU a spusť Run all znovu. Instalace modelu se nespustila.")\nsubprocess.run(["nvidia-smi"], check=True)'
+    );
+    source = source.replace(
       '    EPISODE = generate_episode(BUNDLE, SESSION, additional_words=max(500, int((3600-report["seconds"]) / 60 * 170)))',
       '    raise RuntimeError("Audio je kratší než hodina; scénář zůstává beze změny. Spusť pouze tento renderer znovu.")'
     );
