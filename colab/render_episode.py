@@ -76,22 +76,28 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
     designs = {'petr': 'male, middle-aged, moderate pitch', 'jarda': 'male, middle-aged, low pitch', 'lubo': 'male, young adult, high pitch'}
     reference_text = 'Dobrý den. Dnes společně probereme nové technologie a jejich dopad na každodenní život.'
     prompts = {}
+    uploaded_voice_files = {}
+    if custom_voices:
+        print('Nahraj jedním výběrem tři WAV ukázky (petr/jaroslav nebo jarda/lubo) a pokud máš, jejich TXT přepisy. Uloží se do Drive a příště se znovu neptají.', flush=True)
+        uploaded_voice_files = files.upload()
     for speaker, design in designs.items():
         reference = work / f'{speaker}-reference.wav'
         transcript = work / f'{speaker}-reference.txt'
         if not reference.exists() or not transcript.exists():
             if custom_voices:
-                print(f'{speaker}: nahraj vlastní oprávněnou ukázku WAV (3–10 sekund).')
-                uploaded = files.upload()
-                wavs = [value for name, value in uploaded.items() if name.lower().endswith('.wav')]
-                if len(wavs) != 1:
-                    raise ValueError('Nahraj právě jeden WAV.')
-                reference.write_bytes(wavs[0])
+                aliases = {'petr': ('petr', 'mara'), 'jarda': ('jarda', 'jaroslav', 'beck'), 'lubo': ('lubo', 'smid')}
+                matches = [(name, value) for name, value in uploaded_voice_files.items()
+                           if name.lower().endswith('.wav') and any(alias in name.lower() for alias in aliases[speaker])]
+                if len(matches) != 1:
+                    raise ValueError(f'Chybí právě jedna WAV ukázka pro {speaker}. Nahraj soubor s názvem obsahujícím {aliases[speaker][0]}.')
+                reference.write_bytes(matches[0][1])
                 info = sf.info(str(reference))
                 if not 3 <= info.duration <= 10:
                     reference.unlink()
                     raise ValueError('Ukázka musí mít 3–10 sekund, bez automatického ořezávání.')
-                spoken = input(f'{speaker}: přesný přepis celé ukázky: ').strip()
+                transcript_matches = [(name, value) for name, value in uploaded_voice_files.items()
+                                      if name.lower().endswith('.txt') and any(alias in name.lower() for alias in aliases[speaker])]
+                spoken = transcript_matches[0][1].decode('utf-8') if len(transcript_matches) == 1 else input(f'{speaker}: přesný přepis celé ukázky: ').strip()
                 if not spoken:
                     raise ValueError('Přepis nesmí být prázdný.')
             else:
