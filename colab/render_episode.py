@@ -131,7 +131,11 @@ def main(episode, persist=False, custom_voices=False, session_id=None, download=
             except (RuntimeError, ValueError):
                 pass
         if not valid:
-            samples = np.asarray(model.generate(text=text, voice_clone_prompt=prompts[speaker])[0])
+                # OmniVoice otherwise uses a very short default and silently
+                # truncates long Czech replies. Request a duration based on
+                # natural podcast speech (~140 words/minute).
+                target_seconds = max(3.0, min(55.0, len(text.split()) / 2.33))
+                samples = np.asarray(model.generate(text=text, voice_clone_prompt=prompts[speaker], duration=target_seconds)[0])
             if samples.size == 0 or not np.isfinite(samples).all():
                 raise ValueError(f'Vadné audio v úseku {index + 1}. Opakuj render.')
             temporary = path.with_suffix('.tmp.wav')
