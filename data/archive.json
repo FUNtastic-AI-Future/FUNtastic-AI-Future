@@ -1,0 +1,143 @@
+{
+  "records": [
+    {
+      "id": "b165dc19-1a59-47f6-a883-71f438e67e43",
+      "kind": "profile",
+      "title": "01_jaroslav_beck.md",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "jarda"
+      ],
+      "url": "",
+      "status": "approved",
+      "publishedAt": "2026-08-22",
+      "knownAt": "2026-08-22",
+      "characters": 13925
+    },
+    {
+      "id": "84b14c7b-0222-4fc2-bc36-e47863c95853",
+      "kind": "profile",
+      "title": "02_petr_mara.md",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "petr"
+      ],
+      "url": "",
+      "status": "approved",
+      "publishedAt": "2026-08-22",
+      "knownAt": "2026-08-22",
+      "characters": 13721
+    },
+    {
+      "id": "34bf8659-0c53-4dfd-8bfa-f8bb579b9a78",
+      "kind": "profile",
+      "title": "03_lubo_smid.md",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "lubo"
+      ],
+      "url": "",
+      "status": "approved",
+      "publishedAt": "2026-08-22",
+      "knownAt": "2026-08-22",
+      "characters": 14236
+    },
+    {
+      "id": "65eaa319-c34c-4357-b8cf-18a1b5baadc2",
+      "kind": "profile",
+      "title": "04_skupinova_dynamika.md",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "petr",
+        "jarda",
+        "lubo"
+      ],
+      "url": "",
+      "status": "approved",
+      "publishedAt": "2026-08-22",
+      "knownAt": "2026-08-22",
+      "characters": 4272
+    },
+    {
+      "id": "c1ddef1e-565c-4050-b328-d18d9b9f8164",
+      "kind": "profile",
+      "title": "05_rozliseni_mluvcich.md",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "petr",
+        "jarda",
+        "lubo"
+      ],
+      "url": "",
+      "status": "approved",
+      "publishedAt": "2026-08-22",
+      "knownAt": "2026-08-22",
+      "characters": 3049
+    },
+    {
+      "id": "b239aa88-2ec1-4f17-9665-8d66d91ce4fd",
+      "kind": "profile",
+      "title": "06_evidence_index.md",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "petr",
+        "jarda",
+        "lubo"
+      ],
+      "url": "",
+      "status": "approved",
+      "publishedAt": "2026-08-22",
+      "knownAt": "2026-08-22",
+      "characters": 4537
+    },
+    {
+      "id": "ad8ffccf-c52c-4139-9503-f82bdfd3598b",
+      "kind": "episode",
+      "title": "epizoda-1.txt",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "petr",
+        "jarda",
+        "lubo"
+      ],
+      "url": "https://www.youtube.com/watch?v=vz8o6Ig7ap0",
+      "status": "approved",
+      "publishedAt": "2026-08-22",
+      "knownAt": "2026-08-22",
+      "characters": 75572
+    },
+    {
+      "id": "fac60106-277c-4ece-8552-7fbf87e39f26",
+      "kind": "episode",
+      "title": "epizoda-2.txt",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "petr",
+        "jarda",
+        "lubo"
+      ],
+      "url": "https://www.youtube.com/watch?v=mn2nEjj5Z7k",
+      "status": "approved",
+      "publishedAt": "2026-04-25",
+      "knownAt": "2026-04-25",
+      "characters": 81783
+    },
+    {
+      "id": "f68f6a66-041d-4f12-95aa-8f1e15f8a503",
+      "kind": "episode",
+      "title": "epizoda-3.txt",
+      "rights": "Podklady poskytnuté správcem pro generování epizod. Licence kódu aplikace se na ně nevztahuje; další užití vyžaduje odpovídající oprávnění.",
+      "speakers": [
+        "petr",
+        "jarda",
+        "lubo"
+      ],
+      "url": "https://www.youtube.com/watch?v=Umi_KJWzH3k",
+      "status": "approved",
+      "publishedAt": "2026-06-06",
+      "knownAt": "2026-06-06",
+      "characters": 80379
+    }
+  ],
+  "coverage": "Archiv obsahuje pouze schválené podklady. Období bez podkladů nejsou pokryta."
+}
